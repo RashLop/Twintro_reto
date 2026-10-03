@@ -22,6 +22,21 @@ from features.technology import (
 from features.industry import (
     industry_similarity,
 )
+from features.interests import interest_similarity
+
+FEATURE_NAMES = (
+    "skill_similarity",
+    "skill_complementarity",
+    "role_similarity",
+    "role_complementarity",
+    "experience_similarity",
+    "experience_balance",
+    "seniority_compatibility",
+    "technology_overlap",
+    "technology_depth",
+    "industry_similarity",
+    "interest_similarity",
+)
 
 
 def build_features(source, candidate):
@@ -36,6 +51,8 @@ def build_features(source, candidate):
     candidate_years = float(candidate_profile.get("experience_years", 0.0))
     source_industry = source_profile.get("industry", "")
     candidate_industry = candidate_profile.get("industry", "")
+    source_interests = source_profile.get("interests", [])
+    candidate_interests = candidate_profile.get("interests", [])
 
     features = np.array([
         skill_similarity(source_skills, candidate_skills),
@@ -48,6 +65,10 @@ def build_features(source, candidate):
         technology_overlap(source_skills, candidate_skills),
         technology_depth(source_skills, candidate_skills),
         industry_similarity(source_industry, candidate_industry),
+        interest_similarity(source_interests, candidate_interests),
     ], dtype=np.float64)
 
     return features
+
+
+from matchmaking.explanation import explain_match

@@ -2,13 +2,12 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from feature_builder import build_features
+from feature_builder import FEATURE_NAMES
+from matchmaking.engine import MatchmakingEngine
 from neural_network import NeuralNetwork
 
 PROFILES_PATH = ROOT / "data" / "profiles.json"
@@ -73,18 +72,18 @@ def main():
     profile_a = profiles[first_id]
     profile_b = profiles[second_id]
 
-    features = build_features(profile_a, profile_b)
-    X = np.asarray([features], dtype=np.float64)
-
     model = NeuralNetwork(
-        input_size=len(features),
+        input_size=len(FEATURE_NAMES),
         hidden_sizes=(32, 16, 8),
         learning_rate=0.001,
     )
     model.load(MODEL_PATH)
-
-    prediction = model.predict(X)
-    score = float(prediction[0, 0])
+    result = MatchmakingEngine(model).match_one_to_one(
+        profile_a,
+        profile_b,
+        source_id=first_id,
+        candidate_id=second_id,
+    )
 
     a = profile_a["professional_profile"]
     b = profile_b["professional_profile"]
@@ -116,23 +115,26 @@ def main():
     print()
     print("FEATURES")
     print("-" * 70)
-    print(f"Skill similarity:        {features[0]:.4f}")
-    print(f"Skill complementarity:   {features[1]:.4f}")
-    print(f"Role similarity:         {features[2]:.4f}")
-    print(f"Role complementarity:    {features[3]:.4f}")
-    print(f"Experience similarity:   {features[4]:.4f}")
-    print(f"Experience balance:       {features[5]:.4f}")
-    print(f"Seniority compatibility: {features[6]:.4f}")
-    print(f"Technology overlap:      {features[7]:.4f}")
-    print(f"Technology depth:        {features[8]:.4f}")
-    print(f"Industry similarity:     {features[9]:.4f}")
+    for feature_name, feature_value in result["features"].items():
+        print(f"{feature_name.replace('_', ' ').title():<28}{feature_value:.4f}")
 
     print()
     print("=" * 70)
     print("RESULTADO")
     print("=" * 70)
-    print(f"Match score: {score:.4f}")
-    print(f"Match:       {score * 100:.2f}%")
+    print(f"Match score: {result['score']:.4f}")
+    print(f"Match:       {result['score'] * 100:.2f}%")
+    print()
+    print("¿POR QUÉ ESTE EMPAREJAMIENTO?")
+    for reason in result["explanation"]["reasons"]:
+        print(f"- {reason}")
+    if not result["explanation"]["reasons"]:
+        print("- No hay suficientes factores destacados para explicar el resultado.")
+    if result["explanation"]["considerations"]:
+        print("Diferencias a considerar:")
+        for consideration in result["explanation"]["considerations"]:
+            print(f"- {consideration}")
+    print(f"Tiempo de scoring: {result['latency_ms']:.2f} ms")
     print("=" * 70)
 
 

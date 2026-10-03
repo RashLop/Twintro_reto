@@ -27,12 +27,8 @@ def technology_depth(source_skills, candidate_skills):
     source = _normalize_technology_skills(source_skills)
     candidate = _normalize_technology_skills(candidate_skills)
 
-    if not source and not candidate:
+    if not source or not candidate:
         return 0.0
 
-    total = len(source | candidate)
-    if total == 0:
-        return 0.0
-
-    unique_overlap = len(source & candidate)
-    return unique_overlap / total
+    smaller_profile_size = min(len(source), len(candidate))
+    return len(source & candidate) / smaller_profile_size

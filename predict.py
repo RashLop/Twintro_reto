@@ -3,13 +3,12 @@ import random
 import sys
 from pathlib import Path
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from feature_builder import build_features
+from matchmaking.engine import MatchmakingEngine
 from neural_network import NeuralNetwork
 
 PROFILES_PATH = ROOT / "data" / "profiles.json"
@@ -34,24 +33,19 @@ model = NeuralNetwork(
     learning_rate=0.001,
 )
 model.load(MODEL_PATH)
+engine = MatchmakingEngine(model)
 
 source_id = random.choice(profile_ids)
 source = profiles[source_id]
 source_profile = source["professional_profile"]
 
-matches = []
-for candidate_id in profile_ids:
-    if candidate_id == source_id:
-        continue
-
-    candidate = profiles[candidate_id]
-    features = build_features(source, candidate)
-    prediction = model.predict(np.asarray(features, dtype=np.float64).reshape(1, -1))
-    score = float(prediction[0, 0])
-    matches.append({"candidate": candidate_id, "score": score})
-
-matches.sort(key=lambda match: match["score"], reverse=True)
-top_matches = matches[:TOP_K]
+ranking = engine.match_one_to_many(
+    source,
+    profiles,
+    source_id=source_id,
+    top_k=TOP_K,
+)
+top_matches = ranking["matches"]
 
 print()
 print("=" * 70)
@@ -71,5 +65,11 @@ print("TOP 10 MATCHES")
 print("-" * 70)
 print(f"{'Rank':<6}{'Candidate':<20}{'Performance':>15}")
 for position, match in enumerate(top_matches, start=1):
-    print(f"{position:<6}{match['candidate']:<20}{match['score'] * 100:>14.2f}%")
+    print(f"{position:<6}{match['candidate_id']:<20}{match['score'] * 100:>14.2f}%")
+    reasons = " ".join(match["explanation"]["reasons"])
+    print(f"      Motivos: {reasons or 'No hay suficientes factores destacados.'}")
+    considerations = match["explanation"]["considerations"]
+    if considerations:
+        print(f"      Diferencias: {' '.join(considerations)}")
+print(f"Tiempo de scoring: {ranking['latency_ms']:.2f} ms")
 print("=" * 70)

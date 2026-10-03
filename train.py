@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from neural_network import NeuralNetwork
+from matchmaking.metrics import ranking_metrics
 
 DATASET_PATH = ROOT / "data" / "training_dataset.json"
 MODEL_PATH = ROOT / "matchmaking_model.npz"
@@ -41,12 +42,16 @@ if np.any(y < 0.0) or np.any(y > 1.0):
 indices = np.random.permutation(len(X))
 X = X[indices]
 y = y[indices]
+source_ids = np.asarray(
+    [sample.get("source", "all") for sample in training_data], dtype=object
+)[indices]
 
 split = int(len(X) * TRAIN_SPLIT)
 X_train = X[:split]
 y_train = y[:split]
 X_test = X[split:]
 y_test = y[split:]
+source_ids_test = source_ids[split:]
 
 model = NeuralNetwork(
     input_size=X.shape[1],
@@ -102,6 +107,15 @@ print("\nEvaluación final")
 print(f"Train MSE: {np.mean((train_pred - y_train) ** 2):.6f}")
 print(f"Test MSE:  {np.mean((test_pred - y_test) ** 2):.6f}")
 print(f"Test MAE:  {np.mean(np.abs(test_pred - y_test)):.4f}")
+ranking_quality = ranking_metrics(
+    y_test[:, 0],
+    test_pred[:, 0],
+    source_ids_test,
+    k=10,
+)
+print(f"NDCG@10:   {ranking_quality['ndcg_at_10']:.4f}")
+print(f"Pairwise accuracy: {ranking_quality['pairwise_accuracy']:.4f}")
+print(f"Evaluated sources: {ranking_quality['evaluated_sources']}")
 
 ranked = np.argsort(test_pred[:, 0])[::-1]
 if len(ranked) >= 10:
