@@ -1,13 +1,17 @@
 import json
+import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from feature_builder import build_features
 from matchmaking.engine import MatchmakingEngine
 from neural_network import NeuralNetwork
 
-ROOT = Path(__file__).resolve().parents[1]
 PROFILES_PATH = ROOT / "data" / "profiles.json"
 MODEL_PATH = ROOT / "matchmaking_model.npz"
 
@@ -29,9 +33,36 @@ class MatchmakingHandler(BaseHTTPRequestHandler):
     engine = None
     profiles = None
 
+    def do_GET(self):
+        path = self.path.split("?", 1)[0]
+        if path == "/":
+            self._send_json(200, {
+                "service": "Twintro Matchmaking API",
+                "status": "ok",
+                "endpoints": {
+                    "one_to_one": {
+                        "method": "POST",
+                        "path": "/api/matches/one-to-one",
+                        "body": {"source_id": "usr_212", "candidate_id": "usr_213"},
+                    },
+                    "one_to_many": {
+                        "method": "POST",
+                        "path": "/api/matches/one-to-many",
+                        "body": {"source_id": "usr_212", "top_k": 10},
+                    },
+                },
+            })
+        elif path == "/health":
+            self._send_json(200, {"status": "ok"})
+        elif path in ("/api/matches/one-to-one", "/api/matches/one-to-many"):
+            self._send_json(405, {"error": "Este endpoint requiere POST.", "allowed_method": "POST"})
+        else:
+            self._send_json(404, {"error": "Ruta no encontrada."})
+
     def do_POST(self):
         started = time.perf_counter()
         try:
+            path = self.path.split("?", 1)[0]
             length = int(self.headers.get("Content-Length", "0"))
             if length <= 0 or length > 1_000_000:
                 raise ValueError("El cuerpo de la solicitud está vacío o es demasiado grande.")
@@ -44,7 +75,7 @@ class MatchmakingHandler(BaseHTTPRequestHandler):
                 raise KeyError(f"No existe el perfil de origen '{source_id}'.")
             source = self.profiles[source_id]
 
-            if self.path == "/api/matches/one-to-one":
+            if path == "/api/matches/one-to-one":
                 candidate_id = payload.get("candidate_id")
                 if candidate_id not in self.profiles:
                     raise KeyError(f"No existe el candidato '{candidate_id}'.")
@@ -56,7 +87,7 @@ class MatchmakingHandler(BaseHTTPRequestHandler):
                     source_id=source_id,
                     candidate_id=candidate_id,
                 )
-            elif self.path == "/api/matches/one-to-many":
+            elif path == "/api/matches/one-to-many":
                 candidate_ids = payload.get("candidate_ids", list(self.profiles))
                 if not isinstance(candidate_ids, list):
                     raise ValueError("candidate_ids debe ser una lista de IDs.")
