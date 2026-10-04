@@ -1,0 +1,24 @@
+{
+  "usr_d88dae9bcbd745f490454a8dd4119ec5": {
+    "professional_profile": {
+      "name": "Rasshid Lopez",
+      "role": "Backend Developer",
+      "industry": "Gaming",
+      "skills": [
+        "Agile",
+        "C++",
+        "PostgreSQL",
+        "Python",
+        "PyTorch"
+      ],
+      "experience_years": 12,
+      "interests": [
+        "Design",
+        "Education",
+        "Entrepreneurship",
+        "Gaming"
+      ]
+    },
+    "user_id": "usr_d88dae9bcbd745f490454a8dd4119ec5"
+  }
+}

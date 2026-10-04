@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8fc">
+    <title>Twintro | Matchmaking profesional</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Twintro inicio">
+        <span class="brand-mark" aria-hidden="true">t</span>
+        <span>twintro<span class="brand-period">.</span></span>
+      </a>
+      <span class="topbar-note"><span class="live-dot"></span> Matchmaking profesional</span>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-line"></span> CONEXIONES CON PROPÓSITO</span>
+          <h1>El talento correcto<br>cambia <span>todo.</span></h1>
+          <p>Crea tu perfil y descubre profesionales con quienes compartir habilidades, ideas y nuevas oportunidades.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="orbit-core">t<span>.</span></div>
+          <div class="orbit-node node-top">✦</div>
+          <div class="orbit-node node-left">↗</div>
+          <div class="orbit-node node-right">✳</div>
+        </div>
+      </section>
+
+      <div id="app-message" class="app-message" role="status" aria-live="polite" hidden></div>
+
+      <section class="workspace-grid">
+        <article class="panel profile-panel">
+          <div class="panel-heading">
+            <div class="step-number">01</div>
+            <div>
+              <p class="section-kicker">TU PUNTO DE PARTIDA</p>
+              <h2>Crea tu perfil</h2>
+            </div>
+          </div>
+          <p class="panel-intro">Cuéntanos un poco de tu experiencia profesional. Los campos con <span class="required">*</span> son obligatorios.</p>
+
+          <form id="profile-form">
+            <label class="field-label" for="profile-name">Nombre completo <span class="required">*</span></label>
+            <input id="profile-name" name="name" type="text" placeholder="Ej. Alex Rivera" maxlength="100" autocomplete="name" required>
+
+            <div class="field-row">
+              <div>
+                <label class="field-label" for="profile-role">Rol profesional <span class="required">*</span></label>
+                <select id="profile-role" name="role" required>
+                  <option value="">Cargando opciones...</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="profile-industry">Industria <span class="required">*</span></label>
+                <select id="profile-industry" name="industry" required>
+                  <option value="">Cargando opciones...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="multi-picker" data-picker="skills">
+              <div class="picker-heading">
+                <span class="field-label">Habilidades <span class="required">*</span></span>
+                <span class="picker-count" data-picker-count>0 seleccionadas</span>
+              </div>
+              <input class="picker-search" type="search" placeholder="Filtrar habilidades..." aria-label="Filtrar habilidades">
+              <div class="picker-options" role="group" aria-label="Opciones de habilidades"></div>
+              <span class="field-hint">Elige hasta 8 habilidades. Usa el filtro para encontrar una opción.</span>
+            </div>
+
+            <div class="field-row field-row-bottom">
+              <div>
+                <label class="field-label" for="profile-experience">Años de experiencia <span class="required">*</span></label>
+                <select id="profile-experience" name="experience_years" required>
+                  <option value="">Selecciona años</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="multi-picker interest-picker" data-picker="interests">
+              <div class="picker-heading">
+                <span class="field-label">Intereses <span class="optional">(opcional)</span></span>
+                <span class="picker-count" data-picker-count>0 seleccionados</span>
+              </div>
+              <input class="picker-search" type="search" placeholder="Filtrar intereses..." aria-label="Filtrar intereses">
+              <div class="picker-options" role="group" aria-label="Opciones de intereses"></div>
+              <span class="field-hint">Puedes elegir hasta 5.</span>
+            </div>
+
+            <button class="button button-primary button-full" type="submit">
+              <span>Guardar mi perfil</span><span class="button-arrow" aria-hidden="true">↗</span>
+            </button>
+          </form>
+          <div id="profile-saved" class="profile-saved" hidden></div>
+        </article>
+
+        <article class="panel match-panel">
+          <div class="panel-heading">
+            <div class="step-number">02</div>
+            <div>
+              <p class="section-kicker">ENCUENTRA TU MATCH</p>
+              <h2>Compara perfiles</h2>
+            </div>
+          </div>
+          <p class="panel-intro">Elige tu perfil y descubre qué tan bien conectas con otros profesionales.</p>
+
+          <form id="match-form">
+            <label class="field-label" for="source-profile">Comparar desde el perfil</label>
+            <select id="source-profile" name="source_id" required>
+              <option value="">Primero guarda o selecciona un perfil</option>
+            </select>
+
+            <fieldset class="mode-fieldset">
+              <legend class="field-label">Tipo de comparación</legend>
+              <div class="mode-options">
+                <label class="mode-option">
+                  <input type="radio" name="match-mode" value="one-to-one" checked>
+                  <span class="mode-card"><span class="mode-icon">↔</span><span><strong>Uno a uno</strong><small>Compara dos perfiles</small></span></span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="match-mode" value="one-to-many">
+                  <span class="mode-card"><span class="mode-icon">✳</span><span><strong>Uno a varios</strong><small>Encuentra tus mejores matches</small></span></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div id="single-candidate-wrap">
+              <label class="field-label" for="candidate-profile">Comparar con</label>
+              <select id="candidate-profile" name="candidate_id" required>
+                <option value="">Selecciona un perfil</option>
+              </select>
+            </div>
+
+            <div id="multiple-candidates-wrap" hidden>
+              <div class="candidate-heading">
+                <span class="field-label">Perfiles para comparar</span>
+                <button id="toggle-candidates" class="text-button" type="button">Seleccionar todos</button>
+              </div>
+              <div id="candidate-list" class="candidate-list" aria-label="Perfiles candidatos"></div>
+              <label class="field-label top-gap" for="top-k">Mostrar mejores resultados</label>
+              <select id="top-k" name="top_k">
+                <option value="5">5 resultados</option>
+                <option value="10" selected>10 resultados</option>
+              </select>
+            </div>
+
+            <button id="match-submit" class="button button-dark button-full" type="submit" disabled>
+              <span>Encontrar matches</span><span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+          </form>
+        </article>
+      </section>
+
+      <section id="results-section" class="results-section" hidden>
+        <div class="results-heading">
+          <div>
+            <p class="section-kicker">CONEXIONES PARA TI</p>
+            <h2>Resultados del matching</h2>
+          </div>
+          <span id="results-meta" class="results-meta"></span>
+        </div>
+        <div id="results-list" class="results-list"></div>
+      </section>
+
+      <footer class="page-footer">
+        <span class="footer-brand">twintro<span class="brand-period">.</span></span>
+        <span>Conectando talento. Creando posibilidades.</span>
+      </footer>
+    </main>
+  </body>
+</html>
